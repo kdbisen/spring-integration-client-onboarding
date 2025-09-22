@@ -1,0 +1,46 @@
+[
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/kyc/verify"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "KYC verification completed successfully",
+        "kycScore": 95,
+        "riskLevel": "LOW",
+        "verificationLevel": "ENHANCED",
+        "documentsVerified": true,
+        "biometricVerified": true,
+        "sanctionsCheck": "CLEAR",
+        "pepCheck": "CLEAR",
+        "kycReferenceId": "KYC-{{random.uuid}}",
+        "verificationDate": "{{now}}",
+        "expiryDate": "{{now.plusYears(1)}}"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/kyc/status/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "VERIFIED",
+        "verificationLevel": "ENHANCED",
+        "lastVerified": "{{now.minusDays(30)}}",
+        "expiryDate": "{{now.plusMonths(11)}}"
+      }
+    }
+  }
+]

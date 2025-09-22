@@ -1,0 +1,182 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /client-onboarding
+
+spring:
+  application:
+    name: client-onboarding-service
+  
+  profiles:
+    active: dev
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:h2:mem:onboardingdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  
+  # H2 Console (for development)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Integration Configuration
+  integration:
+    poller:
+      fixed-delay: 1000
+      max-messages-per-poll: 10
+  
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://your-apigee-instance.apigee.net/oauth2/tokeninfo
+          jwk-set-uri: https://your-apigee-instance.apigee.net/oauth2/tokeninfo
+
+# Logging Configuration
+logging:
+  level:
+    com.adyanta.onboarding: DEBUG
+    org.springframework.integration: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+  file:
+    name: logs/client-onboarding.log
+
+# Management and Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Service URLs
+kyc:
+  service:
+    url: http://localhost:8081/kyc/verify
+    timeout: 30000
+
+data:
+  processor:
+    service:
+      url: http://localhost:8082/data/process
+      timeout: 30000
+
+reference:
+  data:
+    service:
+      url: http://localhost:8083/reference/data
+      timeout: 30000
+
+les:
+  service:
+    url: http://localhost:8084/les/verify
+    timeout: 30000
+
+notification:
+  service:
+    url: http://localhost:8085/notification/send
+    timeout: 30000
+
+# Apigee Configuration
+apigee:
+  base:
+    url: https://your-apigee-instance.apigee.net
+  client:
+    id: your-client-id
+    secret: your-client-secret
+  timeout: 30000
+
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      kyc-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      data-processor-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      reference-data-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      les-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      notification-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+
+# Retry Configuration
+resilience4j:
+  retry:
+    instances:
+      kyc-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      data-processor-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      reference-data-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      les-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      notification-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+
+# Timeout Configuration
+resilience4j:
+  timelimiter:
+    instances:
+      kyc-service:
+        timeout-duration: 30s
+      data-processor-service:
+        timeout-duration: 30s
+      reference-data-service:
+        timeout-duration: 30s
+      les-service:
+        timeout-duration: 30s
+      notification-service:
+        timeout-duration: 30s

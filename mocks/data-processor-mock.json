@@ -1,0 +1,44 @@
+[
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/data/process"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Data processing completed successfully",
+        "processingId": "DP-{{random.uuid}}",
+        "dataQualityScore": 92,
+        "enrichmentResults": {
+          "fullName": "{{jsonPath request.body '$.firstName'}} {{jsonPath request.body '$.lastName'}}",
+          "emailDomain": "{{regexExtract (jsonPath request.body '$.email') '@(.+)'}}",
+          "phoneCountryCode": "+1",
+          "addressHash": "{{hash (jsonPath request.body '$.address')}}"
+        },
+        "transformationResults": {
+          "crmData": {
+            "contactId": "{{jsonPath request.body '$.clientId'}}",
+            "name": "{{jsonPath request.body '$.firstName'}} {{jsonPath request.body '$.lastName'}}",
+            "email": "{{jsonPath request.body '$.email'}}",
+            "phone": "{{jsonPath request.body '$.phoneNumber'}}",
+            "segment": "STANDARD"
+          },
+          "coreBankingData": {
+            "customerId": "{{jsonPath request.body '$.clientId'}}",
+            "customerName": "{{jsonPath request.body '$.firstName'}} {{jsonPath request.body '$.lastName'}}",
+            "emailAddress": "{{jsonPath request.body '$.email'}}",
+            "mobileNumber": "{{jsonPath request.body '$.phoneNumber'}}",
+            "documentType": "{{jsonPath request.body '$.documentType'}}",
+            "documentNumber": "{{jsonPath request.body '$.documentNumber'}}"
+          }
+        },
+        "processingTimestamp": "{{now}}"
+      }
+    }
+  }
+]

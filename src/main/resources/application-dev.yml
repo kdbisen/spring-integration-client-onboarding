@@ -1,0 +1,89 @@
+# Development Profile Configuration
+spring:
+  datasource:
+    url: jdbc:h2:mem:onboardingdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: password
+  
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Development Logging
+logging:
+  level:
+    com.adyanta.onboarding: DEBUG
+    org.springframework.integration: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Development Service URLs (Mock Services)
+kyc:
+  service:
+    url: http://localhost:8081/kyc/verify
+    timeout: 5000
+
+data:
+  processor:
+    service:
+      url: http://localhost:8082/data/process
+      timeout: 5000
+
+reference:
+  data:
+    service:
+      url: http://localhost:8083/reference/data
+      timeout: 5000
+
+les:
+  service:
+    url: http://localhost:8084/les/verify
+      timeout: 5000
+
+notification:
+  service:
+    url: http://localhost:8085/notification/send
+    timeout: 5000
+
+# Development Apigee Configuration
+apigee:
+  base:
+    url: https://your-dev-apigee-instance.apigee.net
+  client:
+    id: dev-client-id
+    secret: dev-client-secret
+  timeout: 10000
+
+# Development Circuit Breaker (More lenient)
+resilience4j:
+  circuitbreaker:
+    instances:
+      kyc-service:
+        failure-rate-threshold: 70
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
+      data-processor-service:
+        failure-rate-threshold: 70
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
+      reference-data-service:
+        failure-rate-threshold: 70
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
+      les-service:
+        failure-rate-threshold: 70
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
+      notification-service:
+        failure-rate-threshold: 70
+        wait-duration-in-open-state: 10s
+        sliding-window-size: 5
+        minimum-number-of-calls: 3

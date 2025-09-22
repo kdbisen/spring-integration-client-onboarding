@@ -1,0 +1,183 @@
+version: '3.8'
+
+services:
+  # Client Onboarding Service
+  client-onboarding-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/onboarding_db
+      - DATABASE_USERNAME=onboarding_user
+      - DATABASE_PASSWORD=secure_password
+      - KYC_SERVICE_URL=http://kyc-service:8081/kyc/verify
+      - DATA_PROCESSOR_SERVICE_URL=http://data-processor-service:8082/data/process
+      - REFERENCE_DATA_SERVICE_URL=http://reference-data-service:8083/reference/data
+      - LES_SERVICE_URL=http://les-service:8084/les/verify
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8085/notification/send
+      - APIGEE_BASE_URL=https://your-apigee-instance.apigee.net
+      - APIGEE_CLIENT_ID=your-client-id
+      - APIGEE_CLIENT_SECRET=your-client-secret
+    depends_on:
+      - postgres
+      - kyc-service
+      - data-processor-service
+      - reference-data-service
+      - les-service
+      - notification-service
+    networks:
+      - onboarding-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/client-onboarding/api/v1/onboarding/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=onboarding_db
+      - POSTGRES_USER=onboarding_user
+      - POSTGRES_PASSWORD=secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - onboarding-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onboarding_user -d onboarding_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # KYC Service (Mock)
+  kyc-service:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "8081:1080"
+    environment:
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/kyc-mock.json
+    volumes:
+      - ./mocks/kyc-mock.json:/config/kyc-mock.json
+    networks:
+      - onboarding-network
+
+  # Data Processor Service (Mock)
+  data-processor-service:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "8082:1080"
+    environment:
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/data-processor-mock.json
+    volumes:
+      - ./mocks/data-processor-mock.json:/config/data-processor-mock.json
+    networks:
+      - onboarding-network
+
+  # Reference Data Service (Mock)
+  reference-data-service:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "8083:1080"
+    environment:
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/reference-data-mock.json
+    volumes:
+      - ./mocks/reference-data-mock.json:/config/reference-data-mock.json
+    networks:
+      - onboarding-network
+
+  # LES Service (Mock)
+  les-service:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "8084:1080"
+    environment:
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/les-mock.json
+    volumes:
+      - ./mocks/les-mock.json:/config/les-mock.json
+    networks:
+      - onboarding-network
+
+  # Notification Service (Mock)
+  notification-service:
+    image: mockserver/mockserver:5.15.0
+    ports:
+      - "8085:1080"
+    environment:
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/notification-mock.json
+    volumes:
+      - ./mocks/notification-mock.json:/config/notification-mock.json
+    networks:
+      - onboarding-network
+
+  # Prometheus (Metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - onboarding-network
+
+  # Grafana (Dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - onboarding-network
+
+  # ELK Stack for Logging
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - onboarding-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    volumes:
+      - ./monitoring/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+    networks:
+      - onboarding-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - onboarding-network
+
+volumes:
+  postgres_data:
+  grafana_data:
+  elasticsearch_data:
+
+networks:
+  onboarding-network:
+    driver: bridge

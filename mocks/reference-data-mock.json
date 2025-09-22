@@ -1,0 +1,116 @@
+[
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/reference/data/country/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "countryCode": "{{regexExtract request.path '/country/(.+)'}}",
+        "countryName": "United States",
+        "requiresAddress": true,
+        "currencyCode": "USD",
+        "timezone": "America/New_York",
+        "regulatoryRequirements": {
+          "requiresKyc": true,
+          "requiresAml": true,
+          "requiresSanctionsCheck": true,
+          "dataRetentionYears": 7
+        }
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/reference/data/document-rules/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "documentType": "{{regexExtract request.path '/document-rules/(.+)'}}",
+        "minLength": 5,
+        "maxLength": 20,
+        "pattern": ".*",
+        "required": true,
+        "validationRules": {
+          "format": "ALPHANUMERIC",
+          "checksum": false,
+          "expiryRequired": false
+        }
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/reference/data/industry/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "industryCode": "{{regexExtract request.path '/industry/(.+)'}}",
+        "industryName": "Financial Services",
+        "riskLevel": "MEDIUM",
+        "regulatoryCategory": "STANDARD",
+        "complianceRequirements": {
+          "requiresEnhancedDueDiligence": false,
+          "requiresPeriodicReview": true,
+          "reviewFrequency": "ANNUAL"
+        }
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/reference/data/regulatory/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "countryCode": "{{regexExtract request.path '/regulatory/(.+)'}}",
+        "requiresKyc": true,
+        "requiresAml": true,
+        "requiresSanctionsCheck": true,
+        "dataRetentionYears": 7,
+        "regulatoryBodies": ["FINCEN", "SEC", "FED"],
+        "complianceFramework": "BSA/AML"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/reference/data/currency/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "countryCode": "{{regexExtract request.path '/currency/(.+)'}}",
+        "currencyCode": "USD",
+        "currencyName": "US Dollar",
+        "exchangeRate": 1.0,
+        "lastUpdated": "{{now}}",
+        "currencySymbol": "$",
+        "decimalPlaces": 2
+      }
+    }
+  }
+]

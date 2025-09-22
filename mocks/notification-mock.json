@@ -1,0 +1,93 @@
+[
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/notification/send/email"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Email notification sent successfully",
+        "notificationId": "EMAIL-{{random.uuid}}",
+        "recipient": "{{jsonPath request.body '$.to'}}",
+        "subject": "{{jsonPath request.body '$.subject'}}",
+        "template": "{{jsonPath request.body '$.template'}}",
+        "sentAt": "{{now}}",
+        "deliveryStatus": "DELIVERED"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/notification/send/sms"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "SMS notification sent successfully",
+        "notificationId": "SMS-{{random.uuid}}",
+        "recipient": "{{jsonPath request.body '$.to'}}",
+        "message": "{{jsonPath request.body '$.message'}}",
+        "template": "{{jsonPath request.body '$.template'}}",
+        "sentAt": "{{now}}",
+        "deliveryStatus": "DELIVERED"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/notification/send/internal"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Internal notification sent successfully",
+        "notificationId": "INTERNAL-{{random.uuid}}",
+        "recipients": "{{jsonPath request.body '$.recipients'}}",
+        "subject": "{{jsonPath request.body '$.subject'}}",
+        "message": "{{jsonPath request.body '$.message'}}",
+        "priority": "{{jsonPath request.body '$.priority'}}",
+        "sentAt": "{{now}}",
+        "deliveryStatus": "DELIVERED"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/notification/send/webhook"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "Webhook notification sent successfully",
+        "notificationId": "WEBHOOK-{{random.uuid}}",
+        "url": "{{jsonPath request.body '$.url'}}",
+        "payload": "{{jsonPath request.body '$.payload'}}",
+        "headers": "{{jsonPath request.body '$.headers'}}",
+        "sentAt": "{{now}}",
+        "deliveryStatus": "DELIVERED",
+        "responseCode": 200,
+        "responseTime": 150
+      }
+    }
+  }
+]

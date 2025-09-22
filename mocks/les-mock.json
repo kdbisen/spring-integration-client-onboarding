@@ -1,0 +1,131 @@
+[
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/les/verify"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "message": "LES verification completed successfully",
+        "entityVerified": true,
+        "entityType": "INDIVIDUAL",
+        "entityStatus": "ACTIVE",
+        "registrationNumber": "LES-{{random.uuid}}",
+        "registrationDate": "{{now.minusYears(2)}}",
+        "registrationCountry": "US",
+        "amlCheck": "CLEAR",
+        "sanctionsCheck": "CLEAR",
+        "pepCheck": "CLEAR",
+        "adverseMediaCheck": "CLEAR",
+        "riskScore": 25,
+        "riskLevel": "LOW",
+        "riskFactors": [],
+        "legalName": "{{jsonPath request.body '$.firstName'}} {{jsonPath request.body '$.lastName'}}",
+        "tradingName": "{{jsonPath request.body '$.firstName'}} {{jsonPath request.body '$.lastName'}}",
+        "businessType": "INDIVIDUAL",
+        "industrySector": "FINANCIAL_SERVICES",
+        "incorporationDate": "{{now.minusYears(2)}}",
+        "authorizedCapital": 100000,
+        "paidUpCapital": 50000,
+        "directors": [],
+        "shareholders": [],
+        "beneficialOwners": [],
+        "regulatoryStatus": "COMPLIANT",
+        "licenses": [],
+        "regulatoryBodies": ["FINCEN", "SEC"],
+        "annualRevenue": 1000000,
+        "numberOfEmployees": 10,
+        "creditRating": "A+",
+        "verificationDate": "{{now}}",
+        "verificationExpiry": "{{now.plusYears(1)}}",
+        "dataSource": "LES_DATABASE",
+        "confidenceScore": 95
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/les/status/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "VERIFIED",
+        "entityType": "INDIVIDUAL",
+        "entityStatus": "ACTIVE",
+        "lastVerified": "{{now.minusDays(30)}}",
+        "verificationExpiry": "{{now.plusMonths(11)}}",
+        "riskLevel": "LOW",
+        "complianceStatus": "COMPLIANT"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/les/enhanced-due-diligence"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "SUCCESS",
+        "diligenceId": "EDD-{{random.uuid}}",
+        "diligenceType": "{{jsonPath request.body '$.diligenceType'}}",
+        "riskAssessment": {
+          "overallRisk": "LOW",
+          "financialRisk": "LOW",
+          "reputationRisk": "LOW",
+          "operationalRisk": "LOW"
+        },
+        "recommendations": [
+          "Continue standard monitoring",
+          "Annual review recommended"
+        ],
+        "nextReviewDate": "{{now.plusYears(1)}}",
+        "completedDate": "{{now}}"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/les/compliance-report/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "clientId": "{{regexExtract request.path '/compliance-report/(.+)'}}",
+        "reportDate": "{{now}}",
+        "complianceStatus": "COMPLIANT",
+        "riskLevel": "LOW",
+        "regulatoryChecks": {
+          "amlCheck": "CLEAR",
+          "sanctionsCheck": "CLEAR",
+          "pepCheck": "CLEAR",
+          "adverseMediaCheck": "CLEAR"
+        },
+        "complianceScore": 95,
+        "recommendations": [
+          "Continue current monitoring procedures",
+          "Schedule annual review"
+        ],
+        "nextReviewDate": "{{now.plusYears(1)}}"
+      }
+    }
+  }
+]
