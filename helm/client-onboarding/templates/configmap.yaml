@@ -1,0 +1,287 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "client-onboarding.fullname" . }}-config
+  labels:
+    {{- include "client-onboarding.labels" . | nindent 4 }}
+data:
+  application.yml: |
+    server:
+      port: 8080
+      servlet:
+        context-path: /
+    
+    spring:
+      application:
+        name: client-onboarding-service
+      profiles:
+        active: {{ .Values.env.SPRING_PROFILES_ACTIVE | quote }}
+      
+      # Database Configuration
+      datasource:
+        url: {{ .Values.env.DATABASE_URL | quote }}
+        username: ${DATABASE_USERNAME}
+        password: ${DATABASE_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        hikari:
+          maximum-pool-size: 20
+          minimum-idle: 5
+          connection-timeout: 30000
+          idle-timeout: 600000
+          max-lifetime: 1800000
+      
+      # JPA Configuration
+      jpa:
+        hibernate:
+          ddl-auto: {{ .Values.env.JPA_DDL_AUTO | quote }}
+        show-sql: {{ .Values.env.JPA_SHOW_SQL | quote }}
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.MySQL8Dialect
+            format_sql: true
+            jdbc:
+              batch_size: 20
+            order_inserts: true
+            order_updates: true
+      
+      # Redis Configuration
+      redis:
+        host: {{ .Values.env.REDIS_HOST | quote }}
+        port: {{ .Values.env.REDIS_PORT | quote }}
+        password: {{ .Values.env.REDIS_PASSWORD | quote }}
+        timeout: 2000ms
+        lettuce:
+          pool:
+            max-active: 8
+            max-idle: 8
+            min-idle: 0
+      
+      # Kafka Configuration
+      kafka:
+        bootstrap-servers: {{ .Values.env.KAFKA_BOOTSTRAP_SERVERS | quote }}
+        consumer:
+          group-id: client-onboarding-group
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      
+      # Security Configuration
+      security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: {{ .Values.env.JWT_ISSUER_URI | quote }}
+              jwk-set-uri: {{ .Values.env.JWT_JWK_SET_URI | quote }}
+      
+      # MongoDB Configuration
+      data:
+        mongodb:
+          uri: ${MONGODB_URI}
+          database: ${MONGODB_DATABASE}
+          username: ${MONGODB_USERNAME}
+          password: ${MONGODB_PASSWORD}
+          ssl:
+            enabled: ${MONGODB_SSL_ENABLED:false}
+            invalid-hostname-allowed: ${MONGODB_SSL_INVALID_HOSTNAME_ALLOWED:false}
+            keystore:
+              path: /app/keystore/keystore.jks
+              password: ${MONGODB_KEYSTORE_PASSWORD}
+            truststore:
+              path: /app/keystore/truststore.jks
+              password: ${MONGODB_TRUSTSTORE_PASSWORD}
+            certificate:
+              path: /app/ssl/mongodb-cert.pem
+            key:
+              path: /app/ssl/mongodb-key.pem
+            ca-certificate:
+              path: /app/ssl/ca-cert.pem
+    
+    # Service URLs
+    kyc:
+      service:
+        url: {{ .Values.env.KYC_SERVICE_URL | quote }}
+        timeout: {{ .Values.env.KYC_SERVICE_TIMEOUT | quote }}
+    
+    data-processor:
+      service:
+        url: {{ .Values.env.DATA_PROCESSOR_SERVICE_URL | quote }}
+        timeout: {{ .Values.env.DATA_PROCESSOR_SERVICE_TIMEOUT | quote }}
+    
+    reference-data:
+      service:
+        url: {{ .Values.env.REFERENCE_DATA_SERVICE_URL | quote }}
+        timeout: {{ .Values.env.REFERENCE_DATA_SERVICE_TIMEOUT | quote }}
+    
+    les:
+      service:
+        url: {{ .Values.env.LES_SERVICE_URL | quote }}
+        timeout: {{ .Values.env.LES_SERVICE_TIMEOUT | quote }}
+    
+    notification:
+      service:
+        url: {{ .Values.env.NOTIFICATION_SERVICE_URL | quote }}
+        timeout: {{ .Values.env.NOTIFICATION_SERVICE_TIMEOUT | quote }}
+    
+    # Fenergo Configuration
+    fenergo:
+      api:
+        base:
+          url: {{ .Values.env.FENERGO_API_URL | quote }}
+        timeout: {{ .Values.env.FENERGO_API_TIMEOUT | quote }}
+        client:
+          id: ${FENERGO_CLIENT_ID}
+          secret: ${FENERGO_CLIENT_SECRET}
+        tenant:
+          id: ${FENERGO_TENANT_ID}
+      integration:
+        enabled: {{ .Values.env.FENERGO_INTEGRATION_ENABLED | quote }}
+        auto-create-entities: {{ .Values.env.FENERGO_AUTO_CREATE_ENTITIES | quote }}
+        auto-create-journeys: {{ .Values.env.FENERGO_AUTO_CREATE_JOURNEYS | quote }}
+        default-policy: {{ .Values.env.FENERGO_DEFAULT_POLICY | quote }}
+        default-journey-type: {{ .Values.env.FENERGO_DEFAULT_JOURNEY_TYPE | quote }}
+    
+    # Apigee Configuration
+    apigee:
+      api:
+        base-url: {{ .Values.env.APIGEE_API_URL | quote }}
+        timeout: {{ .Values.env.APIGEE_API_TIMEOUT | quote }}
+      client:
+        id: ${APIGEE_CLIENT_ID}
+        secret: ${APIGEE_CLIENT_SECRET}
+      token:
+        endpoint: {{ .Values.env.APIGEE_TOKEN_ENDPOINT | quote }}
+        scope: {{ .Values.env.APIGEE_TOKEN_SCOPE | quote }}
+    
+    # Logging Configuration
+    logging:
+      level:
+        root: {{ .Values.env.LOG_LEVEL_ROOT | quote }}
+        com.adyanta.onboarding: {{ .Values.env.LOG_LEVEL_APP | quote }}
+        org.springframework.integration: {{ .Values.env.LOG_LEVEL_INTEGRATION | quote }}
+        org.springframework.security: {{ .Values.env.LOG_LEVEL_SECURITY | quote }}
+        org.springframework.web: {{ .Values.env.LOG_LEVEL_WEB | quote }}
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+      file:
+        name: /app/logs/client-onboarding.log
+    
+    # Management and Monitoring
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: {{ .Values.env.MANAGEMENT_ENDPOINTS | quote }}
+      endpoint:
+        health:
+          show-details: {{ .Values.env.MANAGEMENT_HEALTH_DETAILS | quote }}
+      metrics:
+        export:
+          prometheus:
+            enabled: {{ .Values.env.PROMETHEUS_ENABLED | quote }}
+    
+    # OpenAPI Documentation Configuration
+    springdoc:
+      api-docs:
+        path: /api-docs
+      swagger-ui:
+        path: /swagger-ui.html
+        operationsSorter: method
+        tagsSorter: alpha
+        tryItOutEnabled: true
+        filter: true
+        displayRequestDuration: true
+        displayOperationId: false
+        defaultModelsExpandDepth: 1
+        defaultModelExpandDepth: 1
+        docExpansion: none
+        showExtensions: true
+        showCommonExtensions: true
+        deepLinking: true
+        showRequestHeaders: true
+        showCommonExtensions: true
+        supportedSubmitMethods:
+          - get
+          - post
+          - put
+          - delete
+          - patch
+      show-actuator: true
+      group-configs:
+        - group: 'client-onboarding'
+          display-name: 'Client Onboarding API'
+          paths-to-match: '/api/v1/onboarding/**'
+        - group: 'fenergo-integration'
+          display-name: 'Fenergo Integration API'
+          paths-to-match: '/api/v1/fenergo/**'
+        - group: 'monitoring'
+          display-name: 'Monitoring & Health API'
+          paths-to-match: '/actuator/**'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "client-onboarding.fullname" . }}-logback-config
+  labels:
+    {{- include "client-onboarding.labels" . | nindent 4 }}
+data:
+  logback-spring.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+        <!-- Console Appender -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        
+        <!-- File Appender -->
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/app/logs/client-onboarding.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/app/logs/client-onboarding.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>100MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>3GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        
+        <!-- Root Logger -->
+        <root level="{{ .Values.env.LOG_LEVEL_ROOT }}">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+        
+        <!-- Application Logger -->
+        <logger name="com.adyanta.onboarding" level="{{ .Values.env.LOG_LEVEL_APP }}"/>
+        
+        <!-- Spring Integration Logger -->
+        <logger name="org.springframework.integration" level="{{ .Values.env.LOG_LEVEL_INTEGRATION }}"/>
+        
+        <!-- Spring Security Logger -->
+        <logger name="org.springframework.security" level="{{ .Values.env.LOG_LEVEL_SECURITY }}"/>
+        
+        <!-- Spring Web Logger -->
+        <logger name="org.springframework.web" level="{{ .Values.env.LOG_LEVEL_WEB }}"/>
+    </configuration>

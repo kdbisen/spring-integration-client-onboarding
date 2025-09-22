@@ -1,0 +1,194 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "client-onboarding.fullname" . }}
+  labels:
+    {{- include "client-onboarding.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount | default 2 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "client-onboarding.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "client-onboarding.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "client-onboarding.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            # Database secrets
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.database.name }}
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.database.name }}
+                  key: password
+            # Fenergo secrets
+            - name: FENERGO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.fenergo.name }}
+                  key: clientId
+            - name: FENERGO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.fenergo.name }}
+                  key: clientSecret
+            - name: FENERGO_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.fenergo.name }}
+                  key: tenantId
+            # Apigee secrets
+            - name: APIGEE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.apigee.name }}
+                  key: clientId
+            - name: APIGEE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.apigee.name }}
+                  key: clientSecret
+            # MongoDB secrets
+            - name: MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.connection.name }}
+                  key: mongodb-username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.connection.name }}
+                  key: mongodb-password
+            - name: MONGODB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.connection.name }}
+                  key: mongodb-database
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.connection.name }}
+                  key: mongodb-uri
+            - name: MONGODB_SSL_ENABLED
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.connection.name }}
+                  key: mongodb-ssl-enabled
+            - name: MONGODB_SSL_INVALID_HOSTNAME_ALLOWED
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.connection.name }}
+                  key: mongodb-ssl-invalid-hostname-allowed
+            - name: MONGODB_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.keystore.name }}
+                  key: keystore-password
+            - name: MONGODB_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.mongodb.keystore.name }}
+                  key: truststore-password
+          livenessProbe:
+            {{- toYaml .Values.healthCheck.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.healthCheck.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.healthCheck.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
+            - name: logback-config-volume
+              mountPath: /app/logback-spring.xml
+              subPath: logback-spring.xml
+              readOnly: true
+            - name: logs-volume
+              mountPath: /app/logs
+            - name: tmp-volume
+              mountPath: /tmp
+            {{- if .Values.mongodb.enabled }}
+            # MongoDB keystore volume
+            - name: mongodb-keystore-volume
+              mountPath: /app/keystore
+              readOnly: true
+            # MongoDB SSL certificates volume
+            - name: mongodb-ssl-volume
+              mountPath: /app/ssl
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "client-onboarding.fullname" . }}-config
+        - name: logback-config-volume
+          configMap:
+            name: {{ include "client-onboarding.fullname" . }}-logback-config
+        - name: logs-volume
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "client-onboarding.fullname" . }}-logs
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: tmp-volume
+          emptyDir: {}
+        {{- if .Values.mongodb.enabled }}
+        # MongoDB keystore volume
+        - name: mongodb-keystore-volume
+          secret:
+            secretName: {{ .Values.secrets.mongodb.keystore.name }}
+            defaultMode: 0400
+        # MongoDB SSL certificates volume
+        - name: mongodb-ssl-volume
+          secret:
+            secretName: {{ .Values.secrets.mongodb.ssl.name }}
+            defaultMode: 0400
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

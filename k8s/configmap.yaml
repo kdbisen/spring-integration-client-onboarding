@@ -1,0 +1,348 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-onboarding-config
+  namespace: default
+  labels:
+    app: client-onboarding
+    version: "1.0.0"
+    component: config
+data:
+  # Application Configuration
+  application.yml: |
+    server:
+      port: 8080
+      servlet:
+        context-path: /
+    
+    spring:
+      application:
+        name: client-onboarding-service
+      profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
+      
+      # Database Configuration
+      datasource:
+        url: ${DATABASE_URL:jdbc:mysql://mysql-service:3306/client_onboarding}
+        username: ${DATABASE_USERNAME:onboarding_user}
+        password: ${DATABASE_PASSWORD:onboarding_pass}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        hikari:
+          maximum-pool-size: 20
+          minimum-idle: 5
+          connection-timeout: 30000
+          idle-timeout: 600000
+          max-lifetime: 1800000
+      
+      # JPA Configuration
+      jpa:
+        hibernate:
+          ddl-auto: ${JPA_DDL_AUTO:validate}
+        show-sql: ${JPA_SHOW_SQL:false}
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.MySQL8Dialect
+            format_sql: true
+            jdbc:
+              batch_size: 20
+            order_inserts: true
+            order_updates: true
+      
+      # Redis Configuration
+      redis:
+        host: ${REDIS_HOST:redis-service}
+        port: ${REDIS_PORT:6379}
+        password: ${REDIS_PASSWORD:}
+        timeout: 2000ms
+        lettuce:
+          pool:
+            max-active: 8
+            max-idle: 8
+            min-idle: 0
+      
+      # Kafka Configuration
+      kafka:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+        consumer:
+          group-id: client-onboarding-group
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      
+      # Security Configuration
+      security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: ${JWT_ISSUER_URI:https://auth.adyanta.com}
+              jwk-set-uri: ${JWT_JWK_SET_URI:https://auth.adyanta.com/.well-known/jwks.json}
+    
+    # Service URLs
+    kyc:
+      service:
+        url: ${KYC_SERVICE_URL:http://kyc-service:8081/kyc/verify}
+        timeout: ${KYC_SERVICE_TIMEOUT:30000}
+    
+    data-processor:
+      service:
+        url: ${DATA_PROCESSOR_SERVICE_URL:http://data-processor-service:8082/process}
+        timeout: ${DATA_PROCESSOR_SERVICE_TIMEOUT:30000}
+    
+    reference-data:
+      service:
+        url: ${REFERENCE_DATA_SERVICE_URL:http://reference-data-service:8083/validate}
+        timeout: ${REFERENCE_DATA_SERVICE_TIMEOUT:30000}
+    
+    les:
+      service:
+        url: ${LES_SERVICE_URL:http://les-service:8084/verify}
+        timeout: ${LES_SERVICE_TIMEOUT:30000}
+    
+    notification:
+      service:
+        url: ${NOTIFICATION_SERVICE_URL:http://notification-service:8085/send}
+        timeout: ${NOTIFICATION_SERVICE_TIMEOUT:30000}
+    
+    # Fenergo Configuration
+    fenergo:
+      api:
+        base:
+          url: ${FENERGO_API_URL:https://fenergo.adyanta.com/api/v1}
+        timeout: ${FENERGO_API_TIMEOUT:30000}
+        client:
+          id: ${FENERGO_CLIENT_ID:your-fenergo-client-id}
+          secret: ${FENERGO_CLIENT_SECRET:your-fenergo-client-secret}
+        tenant:
+          id: ${FENERGO_TENANT_ID:your-fenergo-tenant-id}
+      integration:
+        enabled: ${FENERGO_INTEGRATION_ENABLED:true}
+        auto-create-entities: ${FENERGO_AUTO_CREATE_ENTITIES:true}
+        auto-create-journeys: ${FENERGO_AUTO_CREATE_JOURNEYS:true}
+        default-policy: ${FENERGO_DEFAULT_POLICY:STANDARD_ONBOARDING}
+        default-journey-type: ${FENERGO_DEFAULT_JOURNEY_TYPE:ONBOARDING}
+    
+    # Apigee Configuration
+    apigee:
+      api:
+        base-url: ${APIGEE_API_URL:https://api.adyanta.com}
+        timeout: ${APIGEE_API_TIMEOUT:30000}
+      client:
+        id: ${APIGEE_CLIENT_ID:your-apigee-client-id}
+        secret: ${APIGEE_CLIENT_SECRET:your-apigee-client-secret}
+      token:
+        endpoint: ${APIGEE_TOKEN_ENDPOINT:/oauth/token}
+        scope: ${APIGEE_TOKEN_SCOPE:api.read api.write}
+    
+    # Logging Configuration
+    logging:
+      level:
+        root: ${LOG_LEVEL_ROOT:INFO}
+        com.adyanta.onboarding: ${LOG_LEVEL_APP:DEBUG}
+        org.springframework.integration: ${LOG_LEVEL_INTEGRATION:INFO}
+        org.springframework.security: ${LOG_LEVEL_SECURITY:INFO}
+        org.springframework.web: ${LOG_LEVEL_WEB:INFO}
+      pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+      file:
+        name: ${LOG_FILE_PATH:/app/logs/client-onboarding.log}
+    
+    # Management and Monitoring
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: ${MANAGEMENT_ENDPOINTS:health,info,metrics,prometheus,env,configprops}
+      endpoint:
+        health:
+          show-details: ${MANAGEMENT_HEALTH_DETAILS:always}
+      metrics:
+        export:
+          prometheus:
+            enabled: ${PROMETHEUS_ENABLED:true}
+    
+    # OpenAPI Documentation Configuration
+    springdoc:
+      api-docs:
+        path: /api-docs
+      swagger-ui:
+        path: /swagger-ui.html
+        operationsSorter: method
+        tagsSorter: alpha
+        tryItOutEnabled: true
+        filter: true
+        displayRequestDuration: true
+        displayOperationId: false
+        defaultModelsExpandDepth: 1
+        defaultModelExpandDepth: 1
+        docExpansion: none
+        showExtensions: true
+        showCommonExtensions: true
+        deepLinking: true
+        showRequestHeaders: true
+        showCommonExtensions: true
+        supportedSubmitMethods:
+          - get
+          - post
+          - put
+          - delete
+          - patch
+      show-actuator: true
+      group-configs:
+        - group: 'client-onboarding'
+          display-name: 'Client Onboarding API'
+          paths-to-match: '/api/v1/onboarding/**'
+        - group: 'fenergo-integration'
+          display-name: 'Fenergo Integration API'
+          paths-to-match: '/api/v1/fenergo/**'
+        - group: 'monitoring'
+          display-name: 'Monitoring & Health API'
+          paths-to-match: '/actuator/**'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-onboarding-logback-config
+  namespace: default
+  labels:
+    app: client-onboarding
+    version: "1.0.0"
+    component: logging
+data:
+  logback-spring.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+        <!-- Console Appender -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        
+        <!-- File Appender -->
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/app/logs/client-onboarding.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/app/logs/client-onboarding.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>100MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>3GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <message/>
+                    <mdc/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        
+        <!-- Root Logger -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+        
+        <!-- Application Logger -->
+        <logger name="com.adyanta.onboarding" level="DEBUG"/>
+        
+        <!-- Spring Integration Logger -->
+        <logger name="org.springframework.integration" level="INFO"/>
+        
+        <!-- Spring Security Logger -->
+        <logger name="org.springframework.security" level="INFO"/>
+        
+        <!-- Spring Web Logger -->
+        <logger name="org.springframework.web" level="INFO"/>
+    </configuration>
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-onboarding-nginx-config
+  namespace: default
+  labels:
+    app: client-onboarding
+    version: "1.0.0"
+    component: nginx
+data:
+  nginx.conf: |
+    upstream client-onboarding-backend {
+        server client-onboarding-service:8080;
+    }
+    
+    server {
+        listen 80;
+        server_name client-onboarding.adyanta.com;
+        
+        # Security headers
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        
+        # Rate limiting
+        limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+        limit_req zone=api burst=20 nodelay;
+        
+        # API endpoints
+        location /api/ {
+            proxy_pass http://client-onboarding-backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # Timeouts
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+            
+            # Buffer settings
+            proxy_buffering on;
+            proxy_buffer_size 4k;
+            proxy_buffers 8 4k;
+        }
+        
+        # Swagger UI
+        location /swagger-ui.html {
+            proxy_pass http://client-onboarding-backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # Health check
+        location /actuator/health {
+            proxy_pass http://client-onboarding-backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # Metrics
+        location /actuator/metrics {
+            proxy_pass http://client-onboarding-backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }

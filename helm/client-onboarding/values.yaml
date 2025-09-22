@@ -1,0 +1,366 @@
+# Default values for client-onboarding
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Image configuration
+image:
+  registry: adyanta
+  repository: client-onboarding
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Image pull secrets
+imagePullSecrets: []
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: client-onboarding.adyanta.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: client-onboarding-tls
+      hosts:
+        - client-onboarding.adyanta.com
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Health checks
+healthCheck:
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  startupProbe:
+    httpGet:
+      path: /actuator/health/startup
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+
+# Environment variables
+env:
+  # Application
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOG_LEVEL_ROOT: "INFO"
+  LOG_LEVEL_APP: "INFO"
+  LOG_LEVEL_INTEGRATION: "INFO"
+  LOG_LEVEL_SECURITY: "INFO"
+  LOG_LEVEL_WEB: "INFO"
+  
+  # Database
+  DATABASE_URL: "jdbc:mysql://mysql-service:3306/client_onboarding"
+  DATABASE_USERNAME: "onboarding_user"
+  DATABASE_PASSWORD: "onboarding_pass"
+  JPA_DDL_AUTO: "validate"
+  JPA_SHOW_SQL: "false"
+  
+  # Redis
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ""
+  
+  # Kafka
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  
+  # Security
+  JWT_ISSUER_URI: "https://auth.adyanta.com"
+  JWT_JWK_SET_URI: "https://auth.adyanta.com/.well-known/jwks.json"
+  
+  # Services
+  KYC_SERVICE_URL: "http://kyc-service:8081/kyc/verify"
+  KYC_SERVICE_TIMEOUT: "30000"
+  DATA_PROCESSOR_SERVICE_URL: "http://data-processor-service:8082/process"
+  DATA_PROCESSOR_SERVICE_TIMEOUT: "30000"
+  REFERENCE_DATA_SERVICE_URL: "http://reference-data-service:8083/validate"
+  REFERENCE_DATA_SERVICE_TIMEOUT: "30000"
+  LES_SERVICE_URL: "http://les-service:8084/verify"
+  LES_SERVICE_TIMEOUT: "30000"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:8085/send"
+  NOTIFICATION_SERVICE_TIMEOUT: "30000"
+  
+  # Fenergo
+  FENERGO_API_URL: "https://fenergo.adyanta.com/api/v1"
+  FENERGO_API_TIMEOUT: "30000"
+  FENERGO_CLIENT_ID: "your-fenergo-client-id"
+  FENERGO_CLIENT_SECRET: "your-fenergo-client-secret"
+  FENERGO_TENANT_ID: "your-fenergo-tenant-id"
+  FENERGO_INTEGRATION_ENABLED: "true"
+  FENERGO_AUTO_CREATE_ENTITIES: "true"
+  FENERGO_AUTO_CREATE_JOURNEYS: "true"
+  FENERGO_DEFAULT_POLICY: "STANDARD_ONBOARDING"
+  FENERGO_DEFAULT_JOURNEY_TYPE: "ONBOARDING"
+  
+  # Apigee
+  APIGEE_API_URL: "https://api.adyanta.com"
+  APIGEE_API_TIMEOUT: "30000"
+  APIGEE_CLIENT_ID: "your-apigee-client-id"
+  APIGEE_CLIENT_SECRET: "your-apigee-client-secret"
+  APIGEE_TOKEN_ENDPOINT: "/oauth/token"
+  APIGEE_TOKEN_SCOPE: "api.read api.write"
+  
+  # Management
+  MANAGEMENT_ENDPOINTS: "health,info,metrics,prometheus,env,configprops"
+  MANAGEMENT_HEALTH_DETAILS: "always"
+  PROMETHEUS_ENABLED: "true"
+
+# Secrets (will be created separately)
+secrets:
+  database:
+    name: "client-onboarding-db-secret"
+    username: "onboarding_user"
+    password: "onboarding_pass"
+  mongodb:
+    name: "client-onboarding-mongodb-secret"
+    username: "onboarding_user"
+    password: "onboarding_pass"
+    keystore:
+      name: "mongodb-keystore-secret"
+      password: "keystore-password"
+    ssl:
+      name: "mongodb-ssl-secret"
+      password: "mongodb-password"
+    connection:
+      name: "mongodb-connection-secret"
+  fenergo:
+    name: "client-onboarding-fenergo-secret"
+    clientId: "your-fenergo-client-id"
+    clientSecret: "your-fenergo-client-secret"
+    tenantId: "your-fenergo-tenant-id"
+  apigee:
+    name: "client-onboarding-apigee-secret"
+    clientId: "your-apigee-client-id"
+    clientSecret: "your-apigee-client-secret"
+
+# Persistent volumes
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  annotations: {}
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: "ingress-nginx"
+      ports:
+        - protocol: TCP
+          port: 8080
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/actuator/prometheus"
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - client-onboarding
+          topologyKey: kubernetes.io/hostname
+
+# Dependencies
+mysql:
+  enabled: true
+  auth:
+    rootPassword: "rootpassword"
+    database: "client_onboarding"
+    username: "onboarding_user"
+    password: "onboarding_pass"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+
+# MongoDB Configuration
+mongodb:
+  enabled: true
+  auth:
+    enabled: true
+    rootUsername: "root"
+    rootPassword: "rootpassword"
+    database: "client_onboarding"
+    username: "onboarding_user"
+    password: "onboarding_pass"
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  ssl:
+    enabled: true
+    requireSSL: true
+    allowInvalidHostnames: true
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 4Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+kafka:
+  enabled: true
+  auth:
+    clientProtocol: "PLAINTEXT"
+  controller:
+    replicaCount: 1
+  brokers: 1
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+prometheus:
+  enabled: true
+  server:
+    persistentVolume:
+      enabled: true
+      size: 8Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+grafana:
+  enabled: true
+  admin:
+    user: "admin"
+    password: "admin"
+  persistence:
+    enabled: true
+    size: 4Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
