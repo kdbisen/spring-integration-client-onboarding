@@ -128,3 +128,10 @@
 {"@timestamp":"2025-09-22T18:45:06.071026+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=56s365ms)."}
 {"@timestamp":"2025-09-22T18:50:59.143992+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m53s33ms)."}
 {"@timestamp":"2025-09-22T18:57:49.069042+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m19s867ms)."}
+{"@timestamp":"2025-09-22T19:17:52.542321+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=16m3s437ms)."}
+{"@timestamp":"2025-09-22T19:24:39.339088+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=6m46s798ms)."}
+{"@timestamp":"2025-09-22T19:28:21.22003+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m11s875ms)."}
+{"@timestamp":"2025-09-22T19:31:44.01069+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m22s777ms)."}
+{"@timestamp":"2025-09-22T19:48:02.080648+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m47s940ms)."}
+{"@timestamp":"2025-09-22T19:58:42.296896+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=8m40s193ms)."}
+{"@timestamp":"2025-09-22T20:04:36.531194+05:30","level":"WARN","logger_name":"com.zaxxer.hikari.pool.HikariPool","message":"HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m54s219ms)."}

@@ -74,6 +74,47 @@ management:
       prometheus:
         enabled: true
 
+# MongoDB Configuration
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/client_onboarding}
+      database: ${MONGODB_DATABASE:client_onboarding}
+      username: ${MONGODB_USERNAME:onboarding_user}
+      password: ${MONGODB_PASSWORD:onboarding_pass}
+      ssl:
+        enabled: ${MONGODB_SSL_ENABLED:false}
+        invalid-hostname-allowed: ${MONGODB_SSL_INVALID_HOSTNAME_ALLOWED:false}
+        keystore:
+          path: ${MONGODB_KEYSTORE_PATH:/app/keystore/keystore.jks}
+          password: ${MONGODB_KEYSTORE_PASSWORD:}
+        truststore:
+          path: ${MONGODB_TRUSTSTORE_PATH:/app/keystore/truststore.jks}
+          password: ${MONGODB_TRUSTSTORE_PASSWORD:}
+  
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+          max-wait: ${REDIS_POOL_MAX_WAIT:-1ms}
+  
+  # Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: ${CACHE_TTL:1800000} # 30 minutes
+      cache-null-values: false
+      enable-statistics: true
+
 # OpenAPI Documentation Configuration
 springdoc:
   api-docs:
@@ -107,9 +148,30 @@ springdoc:
     - group: 'fenergo-integration'
       display-name: 'Fenergo Integration API'
       paths-to-match: '/api/v1/fenergo/**'
+    - group: 'mongodb-testing'
+      display-name: 'MongoDB Testing API'
+      paths-to-match: '/api/v1/mongo/**'
+    - group: 'jwt-token-management'
+      display-name: 'JWT Token Management API'
+      paths-to-match: '/api/v1/jwt/**'
     - group: 'monitoring'
       display-name: 'Monitoring & Health API'
       paths-to-match: '/actuator/**'
+
+# JWT Token Configuration
+jwt:
+  token:
+    service:
+      url: ${JWT_TOKEN_SERVICE_URL:http://localhost:8080/oauth/token}
+    client:
+      id: ${JWT_CLIENT_ID:your-client-id}
+      secret: ${JWT_CLIENT_SECRET:your-client-secret}
+    scope: ${JWT_TOKEN_SCOPE:api.read api.write}
+    grant:
+      type: ${JWT_GRANT_TYPE:client_credentials}
+    cache:
+      renewal:
+        buffer: ${JWT_RENEWAL_BUFFER:20} # seconds before expiry to renew
 
 # Service URLs
 kyc:

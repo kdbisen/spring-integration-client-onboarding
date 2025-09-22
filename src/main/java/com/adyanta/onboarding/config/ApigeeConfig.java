@@ -55,4 +55,21 @@ public class ApigeeConfig {
     public ApigeeTokenService apigeeTokenService() {
         return new ApigeeTokenService(apigeeBaseUrl, apigeeClientId, apigeeClientSecret);
     }
+
+    @Bean
+    public RestTemplate jwtRestTemplate() {
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectionRequestTimeout(Timeout.ofMilliseconds(apigeeTimeout))
+                        .setResponseTimeout(Timeout.ofMilliseconds(apigeeTimeout))
+                        .build())
+                .build();
+
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        factory.setConnectTimeout(Duration.ofMillis(apigeeTimeout));
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+        
+        return restTemplate;
+    }
 }
