@@ -1,0 +1,125 @@
+# Test Profile Configuration
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: password
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# Test Logging
+logging:
+  level:
+    com.adyanta.onboarding: INFO
+    org.springframework.integration: WARN
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+
+# Test Service URLs (Mock Services)
+kyc:
+  service:
+    url: http://localhost:8081/kyc/verify
+    timeout: 1000
+
+data:
+  processor:
+    service:
+      url: http://localhost:8082/data/process
+      timeout: 1000
+
+reference:
+  data:
+    service:
+      url: http://localhost:8083/reference/data
+      timeout: 1000
+
+les:
+  service:
+    url: http://localhost:8084/les/verify
+    timeout: 1000
+
+notification:
+  service:
+    url: http://localhost:8085/notification/send
+    timeout: 1000
+
+# Test Apigee Configuration
+apigee:
+  base:
+    url: https://test-apigee-instance.apigee.net
+  client:
+    id: test-client-id
+    secret: test-client-secret
+  timeout: 1000
+
+# Test Circuit Breaker (Very lenient for testing)
+resilience4j:
+  circuitbreaker:
+    instances:
+      kyc-service:
+        failure-rate-threshold: 90
+        wait-duration-in-open-state: 1s
+        sliding-window-size: 2
+        minimum-number-of-calls: 1
+      data-processor-service:
+        failure-rate-threshold: 90
+        wait-duration-in-open-state: 1s
+        sliding-window-size: 2
+        minimum-number-of-calls: 1
+      reference-data-service:
+        failure-rate-threshold: 90
+        wait-duration-in-open-state: 1s
+        sliding-window-size: 2
+        minimum-number-of-calls: 1
+      les-service:
+        failure-rate-threshold: 90
+        wait-duration-in-open-state: 1s
+        sliding-window-size: 2
+        minimum-number-of-calls: 1
+      notification-service:
+        failure-rate-threshold: 90
+        wait-duration-in-open-state: 1s
+        sliding-window-size: 2
+        minimum-number-of-calls: 1
+
+# Test Retry Configuration
+resilience4j:
+  retry:
+    instances:
+      kyc-service:
+        max-attempts: 1
+        wait-duration: 100ms
+      data-processor-service:
+        max-attempts: 1
+        wait-duration: 100ms
+      reference-data-service:
+        max-attempts: 1
+        wait-duration: 100ms
+      les-service:
+        max-attempts: 1
+        wait-duration: 100ms
+      notification-service:
+        max-attempts: 1
+        wait-duration: 100ms
+
+# Test Timeout Configuration
+resilience4j:
+  timelimiter:
+    instances:
+      kyc-service:
+        timeout-duration: 1s
+      data-processor-service:
+        timeout-duration: 1s
+      reference-data-service:
+        timeout-duration: 1s
+      les-service:
+        timeout-duration: 1s
+      notification-service:
+        timeout-duration: 1s
