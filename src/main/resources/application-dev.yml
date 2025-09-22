@@ -42,7 +42,7 @@ reference:
 les:
   service:
     url: http://localhost:8084/les/verify
-      timeout: 5000
+    timeout: 5000
 
 notification:
   service:

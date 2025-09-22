@@ -1,125 +1,375 @@
-# Spring Integration Client Onboarding Service
+# Spring Integration Client Onboarding with Fenergo
 
-A comprehensive enterprise integration solution demonstrating Spring Integration patterns for client onboarding processes in banking and financial services.
+## Table of Contents
+1. [Overview](#overview)
+2. [What is Spring Integration?](#what-is-spring-integration)
+3. [Use Cases](#use-cases)
+4. [Pros and Cons](#pros-and-cons)
+5. [Design Pattern Comparison](#design-pattern-comparison)
+6. [Architecture Decision](#architecture-decision)
+7. [Getting Started](#getting-started)
+8. [API Documentation](#api-documentation)
+9. [Configuration](#configuration)
+10. [Troubleshooting](#troubleshooting)
 
 ## Overview
 
-This application showcases Enterprise Integration Patterns (EIP) using Spring Integration to orchestrate complex client onboarding workflows involving multiple external services. It demonstrates:
+This project demonstrates a **client onboarding system** built with **Spring Integration** that orchestrates multiple services including KYC verification, data processing, reference data validation, Legal Entity System (LES) verification, and **Fenergo integration** for compliance and workflow management.
 
-- **Message Routing**: Directing messages to appropriate services based on content
-- **Message Splitting**: Breaking down requests into parallel processing streams
-- **Message Filtering**: Validating and filtering messages based on business rules
-- **Message Aggregation**: Combining results from multiple services
-- **Service Activators**: Processing messages through business logic
-- **Error Handling**: Comprehensive error handling and recovery mechanisms
-- **Circuit Breakers**: Resilience patterns for external service calls
-- **JWT Authentication**: Secure API access with Apigee integration
+The system showcases **Enterprise Integration Patterns (EIP)** in action, providing a robust, scalable, and maintainable solution for complex business processes.
 
-## Architecture
+## What is Spring Integration?
 
-### Integration Flow
+**Spring Integration** is an extension of the Spring Framework that provides a comprehensive integration solution for enterprise applications. It implements **Enterprise Integration Patterns (EIP)** and provides a lightweight messaging framework for building integration solutions.
 
-```
-Client Request → Validation → Parallel Processing → Aggregation → Notification → Response
-                     ↓
-                [KYC Service] [Data Processor] [Reference Data] [LES Service]
-```
+### Key Concepts:
 
-### Services Integration
+1. **Message**: The fundamental unit of data exchange
+2. **Channel**: The communication mechanism between components
+3. **Endpoint**: Components that consume, produce, or transform messages
+4. **Service Activator**: Processes messages and returns results
+5. **Transformer**: Converts message payloads from one format to another
+6. **Router**: Routes messages to different channels based on criteria
+7. **Splitter**: Divides a message into multiple messages
+8. **Aggregator**: Combines multiple messages into a single message
+9. **Filter**: Allows or blocks messages based on criteria
 
-1. **KYC Service**: Know Your Customer verification
-2. **Data Processor Service**: Data enrichment and transformation
-3. **Reference Data Service**: Regulatory and reference data validation
-4. **LES Service**: Legal Entity System verification
-5. **Notification Service**: Multi-channel notifications
+### Enterprise Integration Patterns Implemented:
 
-## Features
-
-### Enterprise Integration Patterns
-
-- **Message Router**: Routes messages based on validation results
-- **Message Splitter**: Splits requests for parallel processing
-- **Message Filter**: Filters messages based on business rules
-- **Message Aggregator**: Aggregates results from multiple services
+- **Message Router**: Routes messages to appropriate services
+- **Message Splitter**: Splits complex requests into parallel processing
+- **Message Filter**: Validates requests based on business rules
+- **Message Aggregator**: Combines results from multiple services
 - **Service Activator**: Processes messages through business logic
 - **Error Handler**: Comprehensive error handling and recovery
-
-### Security & Authentication
-
-- **JWT Authentication**: OAuth2 resource server with JWT tokens
-- **Apigee Integration**: API gateway integration with automatic token management
-- **CORS Configuration**: Cross-origin resource sharing support
-- **Role-based Access Control**: Fine-grained authorization
-
-### Resilience Patterns
-
 - **Circuit Breaker**: Prevents cascading failures
+- **Retry Pattern**: Automatic retry for transient failures
+
+## Use Cases
+
+### 1. **Client Onboarding (Primary Use Case)**
+```
+Client Request → Validation → KYC → Data Processing → 
+Reference Data → LES → Notification → Fenergo Integration
+```
+
+**Why Spring Integration?**
+- **Orchestration**: Manages complex multi-step processes
+- **Error Handling**: Comprehensive error recovery
+- **Monitoring**: Built-in observability and metrics
+- **Scalability**: Easy to add/remove processing steps
+
+### 2. **Fenergo Integration**
+```
+Entity Creation → Journey Management → Task Processing → 
+Policy Validation → Compliance Check → Final Response
+```
+
+**Why Spring Integration?**
+- **Service Composition**: Combines multiple Fenergo operations
+- **Async Processing**: Non-blocking operations
+- **Retry Logic**: Automatic retry for API failures
+- **Circuit Breaker**: Prevents Fenergo service overload
+
+### 3. **Microservices Orchestration**
+- **Service Chaining**: Sequential service calls
+- **Parallel Processing**: Concurrent service execution
+- **Data Transformation**: Format conversion between services
+- **Event-Driven Architecture**: Reactive processing
+
+### 4. **Data Pipeline Processing**
+- **ETL Operations**: Extract, Transform, Load
+- **Batch Processing**: Large dataset processing
+- **Real-time Streaming**: Continuous data processing
+- **Data Validation**: Multi-step validation workflows
+
+## Pros and Cons
+
+### ✅ **Pros of Spring Integration**
+
+#### **1. Enterprise Integration Patterns**
+- **Standardized Approach**: Implements proven EIP patterns
+- **Best Practices**: Industry-standard integration patterns
+- **Documentation**: Well-documented patterns and examples
+- **Community Support**: Large community and extensive documentation
+
+#### **2. Declarative Configuration**
+- **XML/Java Config**: Declarative flow definition
+- **Annotation-Based**: Simple `@ServiceActivator` annotations
+- **DSL Support**: Fluent API for complex flows
+- **Configuration Management**: Centralized flow configuration
+
+#### **3. Built-in Features**
+- **Error Handling**: Comprehensive error handling mechanisms
 - **Retry Logic**: Automatic retry with exponential backoff
-- **Timeout Handling**: Configurable timeouts for external services
-- **Fallback Mechanisms**: Graceful degradation when services are unavailable
+- **Circuit Breaker**: Resilience4j integration
+- **Monitoring**: JMX and Actuator integration
+- **Testing**: Built-in testing support
 
-### Monitoring & Observability
+#### **4. Spring Ecosystem Integration**
+- **Spring Boot**: Seamless integration with Spring Boot
+- **Spring Security**: Security integration
+- **Spring Data**: Database integration
+- **Spring Cloud**: Microservices support
 
-- **Structured Logging**: JSON-formatted logs with correlation IDs
-- **Metrics**: Prometheus metrics integration
-- **Health Checks**: Comprehensive health monitoring
-- **Distributed Tracing**: Request tracing across services
+#### **5. Flexibility and Extensibility**
+- **Custom Components**: Easy to create custom endpoints
+- **Multiple Protocols**: HTTP, JMS, Kafka, File, etc.
+- **Pluggable Architecture**: Extensible framework
+- **Multiple Message Formats**: JSON, XML, Binary, etc.
 
-## Technology Stack
+### ❌ **Cons of Spring Integration**
 
-- **Spring Boot 3.2.0**: Application framework
-- **Spring Integration 6.2.0**: Enterprise integration patterns
-- **Spring Security**: Authentication and authorization
-- **Spring Cloud**: Circuit breakers and resilience
-- **H2 Database**: In-memory database for development
-- **PostgreSQL**: Production database
-- **Apache Kafka**: Message streaming (optional)
-- **Prometheus**: Metrics collection
-- **Logback**: Structured logging
+#### **1. Learning Curve**
+- **Complexity**: Steep learning curve for beginners
+- **Abstraction**: High-level abstractions can be confusing
+- **Documentation**: Extensive but sometimes overwhelming
+- **Debugging**: Complex flows can be hard to debug
 
-## Quick Start
+#### **2. Performance Overhead**
+- **Message Overhead**: Additional message wrapping
+- **Memory Usage**: Higher memory consumption
+- **Processing Overhead**: Framework overhead
+- **Serialization**: Additional serialization/deserialization
 
-### Prerequisites
+#### **3. Debugging Challenges**
+- **Flow Complexity**: Complex flows are hard to trace
+- **Error Propagation**: Error handling can be complex
+- **Logging**: Requires careful logging configuration
+- **Monitoring**: Complex monitoring setup
 
+#### **4. Vendor Lock-in**
+- **Spring Dependency**: Tightly coupled to Spring ecosystem
+- **Migration**: Difficult to migrate to other frameworks
+- **Skills**: Requires Spring-specific skills
+- **Alternatives**: Limited alternatives in other ecosystems
+
+## Design Pattern Comparison
+
+### **Approach 1: Spring Integration (Current Implementation)**
+
+```java
+@ServiceActivator(inputChannel = "clientOnboardingInputChannel")
+public Message<ClientOnboardingResponse> processClientOnboarding(Message<ClientOnboardingRequest> message) {
+    // Orchestrated multi-step process
+    ClientOnboardingRequest request = message.getPayload();
+    
+    // Step 1: Validation
+    ClientOnboardingResponse validationResponse = validationService.validateRequest(request);
+    
+    // Step 2: KYC
+    Map<String, Object> kycResult = kycService.verifyClient(request);
+    
+    // Step 3: Data Processing
+    Map<String, Object> dataResult = dataProcessorService.processClientData(request);
+    
+    // Step 4: Reference Data
+    Map<String, Object> referenceResult = referenceDataService.fetchReferenceData(request);
+    
+    // Step 5: LES
+    Map<String, Object> lesResult = lesService.verifyWithLes(request);
+    
+    // Step 6: Notification
+    Map<String, Object> notificationResult = notificationService.sendNotification(validationResponse);
+    
+    return createSuccessResponse(validationResponse);
+}
+```
+
+**Design Patterns Used:**
+- **Orchestrator Pattern**: Central coordinator manages the flow
+- **Service Activator Pattern**: Each step is a service activator
+- **Message Router Pattern**: Routes messages to appropriate services
+- **Aggregator Pattern**: Combines results from multiple services
+
+### **Approach 2: Payload-Based Processor System**
+
+```java
+@Component
+public class PayloadProcessorOrchestrator {
+    
+    @Autowired
+    private Map<String, PayloadProcessor> processors;
+    
+    public ProcessingResult process(Payload payload) {
+        String payloadType = payload.getType();
+        PayloadProcessor processor = processors.get(payloadType);
+        
+        if (processor == null) {
+            throw new UnsupportedPayloadTypeException(payloadType);
+        }
+        
+        return processor.process(payload);
+    }
+}
+
+@Component("CLIENT_ONBOARDING")
+public class ClientOnboardingProcessor implements PayloadProcessor {
+    
+    @Override
+    public ProcessingResult process(Payload payload) {
+        ClientOnboardingRequest request = (ClientOnboardingRequest) payload.getData();
+        
+        // Sequential processing
+        ValidationResult validation = validate(request);
+        KycResult kyc = performKyc(request);
+        DataResult data = processData(request);
+        ReferenceResult reference = validateReference(request);
+        LesResult les = verifyLes(request);
+        NotificationResult notification = sendNotification(request);
+        
+        return ProcessingResult.success(validation, kyc, data, reference, les, notification);
+    }
+}
+```
+
+**Design Patterns Used:**
+- **Strategy Pattern**: Different processors for different payload types
+- **Factory Pattern**: Creates appropriate processor based on payload type
+- **Template Method Pattern**: Common processing template
+- **Chain of Responsibility**: Sequential processing steps
+
+## Architecture Decision
+
+### **When to Use Spring Integration:**
+
+#### ✅ **Use Spring Integration When:**
+
+1. **Complex Orchestration Required**
+   - Multiple services need coordination
+   - Complex error handling and retry logic
+   - Need for circuit breaker patterns
+   - Async processing requirements
+
+2. **Enterprise Integration Patterns Needed**
+   - Message routing and transformation
+   - Service composition and aggregation
+   - Event-driven architecture
+   - Complex data flows
+
+3. **Spring Ecosystem Integration**
+   - Already using Spring Boot
+   - Need Spring Security integration
+   - Want Spring Cloud features
+   - Spring Data integration required
+
+4. **Monitoring and Observability**
+   - Need comprehensive monitoring
+   - JMX integration required
+   - Actuator endpoints needed
+   - Metrics and health checks
+
+5. **Scalability and Resilience**
+   - High-throughput processing
+   - Fault tolerance requirements
+   - Load balancing needs
+   - Circuit breaker patterns
+
+#### ❌ **Don't Use Spring Integration When:**
+
+1. **Simple Processing**
+   - Single service calls
+   - Simple CRUD operations
+   - No complex orchestration needed
+   - Minimal error handling requirements
+
+2. **Performance Critical**
+   - Ultra-low latency requirements
+   - High-performance computing
+   - Memory-constrained environments
+   - CPU-intensive operations
+
+3. **Non-Spring Ecosystem**
+   - Using other frameworks (Quarkus, Micronaut)
+   - Non-JVM languages
+   - Microservices with different tech stacks
+   - Cloud-native alternatives preferred
+
+4. **Simple Workflows**
+   - Linear processing steps
+   - No complex routing needed
+   - Simple error handling sufficient
+   - Minimal monitoring requirements
+
+### **Comparison Matrix:**
+
+| Aspect | Spring Integration | Payload-Based Processor |
+|--------|-------------------|------------------------|
+| **Complexity** | High | Medium |
+| **Learning Curve** | Steep | Moderate |
+| **Performance** | Medium | High |
+| **Flexibility** | High | Medium |
+| **Error Handling** | Comprehensive | Basic |
+| **Monitoring** | Built-in | Custom |
+| **Testing** | Built-in | Custom |
+| **Scalability** | High | Medium |
+| **Maintainability** | High | Medium |
+| **Debugging** | Complex | Simple |
+
+## Getting Started
+
+### **Prerequisites:**
 - Java 17+
 - Maven 3.6+
-- Docker (optional, for external services)
+- Spring Boot 3.2.0
+- Spring Integration 6.2.0
 
-### Running the Application
+### **Installation:**
 
-1. **Clone and Build**
-   ```bash
-   git clone <repository-url>
-   cd spring-integration-client-onboarding
-   mvn clean install
-   ```
-
-2. **Run with Development Profile**
-   ```bash
-   mvn spring-boot:run -Dspring-boot.run.profiles=dev
-   ```
-
-3. **Access the Application**
-   - Application: http://localhost:8080/client-onboarding
-   - H2 Console: http://localhost:8080/client-onboarding/h2-console
-   - Health Check: http://localhost:8080/client-onboarding/api/v1/onboarding/health
-   - Metrics: http://localhost:8080/client-onboarding/actuator/metrics
-
-### API Endpoints
-
-#### Submit Client Onboarding Request
 ```bash
-curl -X POST http://localhost:8080/client-onboarding/api/v1/onboarding/submit \
+# Clone the repository
+git clone <repository-url>
+cd spring-integration-client-onboarding
+
+# Build the project
+mvn clean package
+
+# Run the application
+java -jar target/spring-integration-client-onboarding-1.0.0.jar
+```
+
+### **Configuration:**
+
+```yaml
+# application.yml
+spring:
+  application:
+    name: client-onboarding-service
+  
+fenergo:
+  api:
+    base:
+      url: https://your-fenergo-instance.fenergo.com/api/v1
+    client:
+      id: your-fenergo-client-id
+      secret: your-fenergo-client-secret
+    tenant:
+      id: your-fenergo-tenant-id
+
+# Service URLs
+kyc:
+  service:
+    url: http://localhost:8081/kyc/verify
+    
+data-processor:
+  service:
+    url: http://localhost:8082/data/process
+```
+
+## API Documentation
+
+### **Client Onboarding API:**
+
+```bash
+# Submit client onboarding request
+curl -X POST http://localhost:8080/api/v1/onboarding/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt-token>" \
   -d '{
-    "clientId": "CLIENT001",
     "firstName": "John",
     "lastName": "Doe",
     "email": "john.doe@example.com",
     "phoneNumber": "+1234567890",
-    "documentType": "PASSPORT",
-    "documentNumber": "P123456789",
     "address": {
       "street": "123 Main St",
       "city": "New York",
@@ -130,198 +380,140 @@ curl -X POST http://localhost:8080/client-onboarding/api/v1/onboarding/submit \
   }'
 ```
 
-#### Get Onboarding Status
+### **Fenergo Integration API:**
+
 ```bash
-curl -X GET http://localhost:8080/client-onboarding/api/v1/onboarding/status/CLIENT001 \
-  -H "Authorization: Bearer <jwt-token>"
+# Create Fenergo entity
+curl -X POST http://localhost:8080/api/v1/fenergo/entities \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt-token>" \
+  -d '{
+    "entityName": "John Doe",
+    "entityType": "INDIVIDUAL",
+    "personalInformation": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "nationality": "US"
+    }
+  }'
+
+# Create Fenergo journey
+curl -X POST http://localhost:8080/api/v1/fenergo/journeys \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt-token>" \
+  -d '{
+    "journeyName": "Client Onboarding Journey",
+    "journeyType": "ONBOARDING",
+    "entityId": "ENTITY_123",
+    "policyId": "POLICY_456"
+  }'
 ```
 
 ## Configuration
 
-### Environment Variables
+### **Spring Integration Configuration:**
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection URL | `jdbc:h2:mem:onboardingdb` |
-| `DATABASE_USERNAME` | Database username | `sa` |
-| `DATABASE_PASSWORD` | Database password | `password` |
-| `APIGEE_BASE_URL` | Apigee base URL | `https://your-apigee-instance.apigee.net` |
-| `APIGEE_CLIENT_ID` | Apigee client ID | `your-client-id` |
-| `APIGEE_CLIENT_SECRET` | Apigee client secret | `your-client-secret` |
-| `KYC_SERVICE_URL` | KYC service URL | `http://localhost:8081/kyc/verify` |
-| `DATA_PROCESSOR_SERVICE_URL` | Data processor service URL | `http://localhost:8082/data/process` |
-| `REFERENCE_DATA_SERVICE_URL` | Reference data service URL | `http://localhost:8083/reference/data` |
-| `LES_SERVICE_URL` | LES service URL | `http://localhost:8084/les/verify` |
-| `NOTIFICATION_SERVICE_URL` | Notification service URL | `http://localhost:8085/notification/send` |
-
-### Profiles
-
-- **dev**: Development configuration with H2 database and mock services
-- **prod**: Production configuration with PostgreSQL and real services
-
-## Integration Patterns Implementation
-
-### 1. Message Router
 ```java
-@Bean
-public IntegrationFlow validationFlow() {
-    return IntegrationFlows
-        .from(validationChannel())
-        .route(Message.class, this::routeAfterValidation)
-        .get();
-}
-```
-
-### 2. Message Splitter
-```java
-@Bean
-public AbstractMessageSplitter parallelServiceSplitter() {
-    return new AbstractMessageSplitter() {
-        @Override
-        protected Object splitMessage(Message<?> message) {
-            // Split into parallel service calls
-            return Arrays.asList(kycMessage, dataProcessorMessage, refDataMessage, lesMessage);
-        }
-    };
-}
-```
-
-### 3. Message Aggregator
-```java
-@Bean
-public IntegrationFlow parallelProcessingFlow() {
-    return IntegrationFlows
-        .from("parallelProcessingChannel")
-        .split(parallelServiceSplitter())
-        .aggregate(aggregatorSpec -> aggregatorSpec
-            .correlationStrategy(m -> m.getHeaders().get("correlationId"))
-            .releaseStrategy(group -> group.size() >= 4)
-            .outputProcessor(aggregateResults())
-        )
-        .get();
-}
-```
-
-### 4. Circuit Breaker Integration
-```java
-@Bean
-public IntegrationFlow kycFlow() {
-    return IntegrationFlows
-        .from(kycChannel())
-        .handle(kycService, "verifyClient")
-        .circuitBreaker(cb -> cb
-            .failureThreshold(5)
-            .timeout(Duration.ofSeconds(30))
-        )
-        .get();
-}
-```
-
-## Error Handling
-
-### Global Exception Handler
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+@Configuration
+@EnableIntegration
+public class IntegrationConfig {
     
-    @ExceptionHandler(ServiceIntegrationException.class)
-    public ResponseEntity<Map<String, Object>> handleServiceIntegrationException(
-            ServiceIntegrationException ex, WebRequest request) {
-        // Handle service integration errors
+    @Bean
+    public MessageChannel clientOnboardingInputChannel() {
+        return new DirectChannel();
+    }
+    
+    @Bean
+    public MessageChannel fenergoEntityInputChannel() {
+        return new DirectChannel();
     }
 }
 ```
 
-### Integration Error Handling
+### **Service Configuration:**
+
 ```java
-@Bean
-public IntegrationFlow errorHandlingFlow() {
-    return IntegrationFlows
-        .from(errorChannel())
-        .log(LoggingHandler.Level.ERROR, "Error occurred in onboarding process")
-        .transform(createErrorResponse())
-        .channel(responseChannel())
-        .get();
+@Service
+public class ValidationService {
+    
+    @ServiceActivator(inputChannel = "validationChannel")
+    public ClientOnboardingResponse validateRequest(ClientOnboardingRequest request) {
+        // Validation logic
+    }
 }
 ```
 
-## Monitoring & Observability
+## Troubleshooting
 
-### Health Checks
-- Application health: `/actuator/health`
-- Service-specific health: `/actuator/health/{service}`
-- Database health: `/actuator/health/db`
+### **Common Issues:**
 
-### Metrics
-- Prometheus metrics: `/actuator/prometheus`
-- Custom metrics: `/actuator/metrics`
-- Service metrics: `/actuator/metrics/{metric}`
+1. **Message Channel Not Found**
+   - Ensure channels are properly configured
+   - Check channel names match exactly
+   - Verify `@EnableIntegration` annotation
 
-### Logging
-- Structured JSON logs with correlation IDs
-- Separate log files for different components
-- Log rotation and retention policies
+2. **Service Activator Not Working**
+   - Check method signatures
+   - Verify input/output channel names
+   - Ensure proper message types
 
-## Testing
+3. **Fenergo API Errors**
+   - Verify API credentials
+   - Check network connectivity
+   - Review API rate limits
 
-### Unit Tests
-```bash
-mvn test
+4. **Performance Issues**
+   - Monitor message queue sizes
+   - Check for memory leaks
+   - Review thread pool configurations
+
+### **Debugging Tips:**
+
+1. **Enable Debug Logging:**
+```yaml
+logging:
+  level:
+    com.adyanta.onboarding: DEBUG
+    org.springframework.integration: DEBUG
 ```
 
-### Integration Tests
-```bash
-mvn verify
+2. **Use Integration Monitoring:**
+```java
+@Bean
+public IntegrationManagementConfigurer integrationManagementConfigurer() {
+    IntegrationManagementConfigurer configurer = new IntegrationManagementConfigurer();
+    configurer.setDefaultLoggingEnabled(true);
+    configurer.setDefaultMetricsEnabled(true);
+    return configurer;
+}
 ```
 
-### Load Testing
+3. **Health Checks:**
 ```bash
-# Using Apache Bench
-ab -n 1000 -c 10 -H "Authorization: Bearer <token>" \
-   http://localhost:8080/client-onboarding/api/v1/onboarding/submit
+# Check application health
+curl http://localhost:8080/actuator/health
+
+# Check integration metrics
+curl http://localhost:8080/actuator/metrics
 ```
 
-## Deployment
+## Conclusion
 
-### Docker Deployment
-```bash
-# Build Docker image
-docker build -t client-onboarding-service .
+**Spring Integration** is a powerful framework for building complex integration solutions, especially when you need:
 
-# Run with Docker Compose
-docker-compose up -d
-```
+- **Enterprise Integration Patterns**
+- **Complex orchestration**
+- **Comprehensive error handling**
+- **Built-in monitoring and observability**
+- **Spring ecosystem integration**
 
-### Kubernetes Deployment
-```bash
-# Apply Kubernetes manifests
-kubectl apply -f k8s/
-```
+However, for simpler use cases or performance-critical applications, a **payload-based processor system** might be more appropriate.
 
-### Production Considerations
+The choice between these approaches depends on your specific requirements, team expertise, and system constraints. This project demonstrates both approaches and provides a foundation for making informed architectural decisions.
 
-1. **Database**: Use PostgreSQL or Oracle for production
-2. **Security**: Configure proper JWT validation and Apigee integration
-3. **Monitoring**: Set up Prometheus and Grafana dashboards
-4. **Logging**: Configure centralized logging (ELK stack)
-5. **Scaling**: Use horizontal pod autoscaling
-6. **Backup**: Implement database backup and recovery procedures
+---
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation wiki
+**For more information, see:**
+- [Spring Integration Documentation](https://docs.spring.io/spring-integration/docs/current/reference/html/)
+- [Enterprise Integration Patterns](https://www.enterpriseintegrationpatterns.com/)
+- [Fenergo Integration Guide](./docs/FENERGO_INTEGRATION.md)

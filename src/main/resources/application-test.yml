@@ -88,9 +88,6 @@ resilience4j:
         wait-duration-in-open-state: 1s
         sliding-window-size: 2
         minimum-number-of-calls: 1
-
-# Test Retry Configuration
-resilience4j:
   retry:
     instances:
       kyc-service:
@@ -108,9 +105,6 @@ resilience4j:
       notification-service:
         max-attempts: 1
         wait-duration: 100ms
-
-# Test Timeout Configuration
-resilience4j:
   timelimiter:
     instances:
       kyc-service:

@@ -110,7 +110,7 @@ public class DataProcessorService {
         enrichedData.put("fullName", request.getFirstName() + " " + request.getLastName());
         enrichedData.put("emailDomain", extractEmailDomain(request.getEmail()));
         enrichedData.put("phoneCountryCode", extractCountryCode(request.getPhoneNumber()));
-        enrichedData.put("addressHash", generateAddressHash(request.getAddress()));
+        enrichedData.put("addressHash", generateAddressHashFromAddress(request.getAddress()));
         enrichedData.put("dataQualityScore", calculateDataQualityScore(request));
         enrichedData.put("riskCategory", determineRiskCategory(request));
         enrichedData.put("clientSegment", determineClientSegment(request));
@@ -269,6 +269,15 @@ public class DataProcessorService {
     private String generateAddressHash(Map<String, Object> address) {
         if (address != null) {
             String addressString = address.toString();
+            return String.valueOf(addressString.hashCode());
+        }
+        return null;
+    }
+
+    private String generateAddressHashFromAddress(ClientOnboardingRequest.Address address) {
+        if (address != null) {
+            String addressString = address.getStreet() + ", " + address.getCity() + ", " + 
+                                 address.getState() + " " + address.getPostalCode() + ", " + address.getCountry();
             return String.valueOf(addressString.hashCode());
         }
         return null;

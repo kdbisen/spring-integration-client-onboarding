@@ -1,6 +1,7 @@
 package com.adyanta.onboarding.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,26 +13,32 @@ import java.util.Map;
 /**
  * Client onboarding request model
  */
+@Schema(description = "Client onboarding request containing all necessary information for the onboarding process")
 public class ClientOnboardingRequest {
     
     @NotBlank(message = "Client ID is required")
     @JsonProperty("clientId")
+    @Schema(description = "Unique identifier for the client", example = "CLIENT_123e4567")
     private String clientId;
     
     @NotBlank(message = "First name is required")
     @JsonProperty("firstName")
+    @Schema(description = "Client's first name", example = "John")
     private String firstName;
     
     @NotBlank(message = "Last name is required")
     @JsonProperty("lastName")
+    @Schema(description = "Client's last name", example = "Doe")
     private String lastName;
     
     @Email(message = "Valid email is required")
     @JsonProperty("email")
+    @Schema(description = "Client's email address", example = "john.doe@example.com")
     private String email;
     
     @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Valid phone number is required")
     @JsonProperty("phoneNumber")
+    @Schema(description = "Client's phone number in international format", example = "+1234567890")
     private String phoneNumber;
     
     @NotBlank(message = "Document type is required")

@@ -74,6 +74,43 @@ management:
       prometheus:
         enabled: true
 
+# OpenAPI Documentation Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+    displayRequestDuration: true
+    displayOperationId: false
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    docExpansion: none
+    showExtensions: true
+    showCommonExtensions: true
+    deepLinking: true
+    showRequestHeaders: true
+    supportedSubmitMethods:
+      - get
+      - post
+      - put
+      - delete
+      - patch
+  show-actuator: true
+  group-configs:
+    - group: 'client-onboarding'
+      display-name: 'Client Onboarding API'
+      paths-to-match: '/api/v1/onboarding/**'
+    - group: 'fenergo-integration'
+      display-name: 'Fenergo Integration API'
+      paths-to-match: '/api/v1/fenergo/**'
+    - group: 'monitoring'
+      display-name: 'Monitoring & Health API'
+      paths-to-match: '/actuator/**'
+
 # Service URLs
 kyc:
   service:
@@ -111,8 +148,60 @@ apigee:
     secret: your-client-secret
   timeout: 30000
 
+# Fenergo Configuration
+fenergo:
+  api:
+    base:
+      url: https://your-fenergo-instance.fenergo.com/api/v1
+    timeout: 30000
+    client:
+      id: your-fenergo-client-id
+      secret: your-fenergo-client-secret
+    tenant:
+      id: your-fenergo-tenant-id
+  integration:
+    enabled: true
+    auto-create-entities: true
+    auto-create-journeys: true
+    default-policy: "STANDARD_ONBOARDING"
+    default-journey-type: "ONBOARDING"
+
 # Circuit Breaker Configuration
 resilience4j:
+  timelimiter:
+    instances:
+      kyc-service:
+        timeout-duration: 30s
+      data-processor-service:
+        timeout-duration: 30s
+      reference-data-service:
+        timeout-duration: 30s
+      les-service:
+        timeout-duration: 30s
+      notification-service:
+        timeout-duration: 30s
+  retry:
+    instances:
+      kyc-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      data-processor-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      reference-data-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      les-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+      notification-service:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
   circuitbreaker:
     instances:
       kyc-service:
@@ -141,42 +230,5 @@ resilience4j:
         sliding-window-size: 10
         minimum-number-of-calls: 5
 
-# Retry Configuration
-resilience4j:
-  retry:
-    instances:
-      kyc-service:
-        max-attempts: 3
-        wait-duration: 1s
-        exponential-backoff-multiplier: 2
-      data-processor-service:
-        max-attempts: 3
-        wait-duration: 1s
-        exponential-backoff-multiplier: 2
-      reference-data-service:
-        max-attempts: 3
-        wait-duration: 1s
-        exponential-backoff-multiplier: 2
-      les-service:
-        max-attempts: 3
-        wait-duration: 1s
-        exponential-backoff-multiplier: 2
-      notification-service:
-        max-attempts: 3
-        wait-duration: 1s
-        exponential-backoff-multiplier: 2
 
-# Timeout Configuration
-resilience4j:
-  timelimiter:
-    instances:
-      kyc-service:
-        timeout-duration: 30s
-      data-processor-service:
-        timeout-duration: 30s
-      reference-data-service:
-        timeout-duration: 30s
-      les-service:
-        timeout-duration: 30s
-      notification-service:
-        timeout-duration: 30s
+

@@ -41,8 +41,7 @@ public class ApigeeConfig {
                 .build();
 
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        factory.setConnectTimeout(apigeeTimeout);
-        factory.setReadTimeout(apigeeTimeout);
+        factory.setConnectTimeout(Duration.ofMillis(apigeeTimeout));
 
         RestTemplate restTemplate = new RestTemplate(factory);
         

@@ -97,9 +97,6 @@ resilience4j:
         wait-duration-in-open-state: 60s
         sliding-window-size: 20
         minimum-number-of-calls: 10
-
-# Production Retry Configuration
-resilience4j:
   retry:
     instances:
       kyc-service:
@@ -122,9 +119,6 @@ resilience4j:
         max-attempts: 5
         wait-duration: 2s
         exponential-backoff-multiplier: 2
-
-# Production Timeout Configuration
-resilience4j:
   timelimiter:
     instances:
       kyc-service:
